@@ -1,0 +1,142 @@
+.navbar {
+  padding: 8px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.navbar-left .logo-link {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.logo-img {
+  width: 52px;
+  height: 52px;
+  margin-right: 10px;
+}
+
+.logo-text {
+  font-size: 1.5rem;
+  color: black;
+}
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+.nav-links a {
+  margin: 0 10px;
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+}
+
+.nav-links .active-link {
+  color: #0077cc;
+  font-weight: bold;
+  border-bottom: 2px solid #0077cc;
+}
+
+.nav-profile {
+  display: flex;
+  align-items: center;
+}
+
+.profile-link {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: #333;
+  gap: 8px;
+}
+
+.profile-icon {
+  font-size: 22px;
+}
+
+.profile-img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid #ccc;
+}
+
+@media (max-width: 768px) {
+ .navbar {
+  background: white;
+  padding: 15px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.navbar-left .logo-link {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.logo-img {
+  width: 52px;
+  height: 52px;
+  margin-right: 10px;
+}
+
+.logo-text {
+  font-size: 1.5re;
+  font-weight: bold;
+  color: #0077cc;
+}
+
+.navbar-right {
+  display: none;
+  align-items: center;
+  gap: 30px;
+}
+
+.nav-links a {
+  margin: 0 10px;
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+}
+
+.nav-links .active-link {
+  color: #0077cc;
+  font-weight: bold;
+  border-bottom: 2px solid #0077cc;
+}
+
+.nav-profile {
+  display: flex;
+  align-items: center;
+}
+
+.profile-link {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: #333;
+  gap: 8px;
+}
+
+.profile-icon {
+  font-size: 22px;
+}
+
+.profile-img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid #ccc;
+}
+  
+}

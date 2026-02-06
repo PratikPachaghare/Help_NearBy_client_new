@@ -1,0 +1,95 @@
+/* Requast.css */
+.request-container {
+  max-width: 900px;
+  margin: 20px auto;
+  padding: 20px;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.request-tabs {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.tab {
+  padding: 10px 20px;
+  border: none;
+  background-color: #eee;
+  margin: 0 5px;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.tab.active {
+  background-color: #0077cc;
+  color: white;
+}
+
+.request-list,
+.accepted-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.request-card {
+  border: 1px solid #ddd;
+  border-left: 5px solid #0077cc;
+  border-radius: 6px;
+  padding: 15px 20px;
+  background: #fdfdfd;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.request-card h3 {
+  margin: 0;
+  color: #0077cc;
+}
+
+.card-buttons {
+  margin-top: 10px;
+}
+
+.accept, .reject {
+  padding: 8px 15px;
+  margin-right: 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.accept {
+  background-color: #28a745;
+  color: white;
+}
+
+.reject {
+  background-color: #dc3545;
+  color: white;
+}
+
+.accepted-label {
+  color: green;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.request-card img {
+  width: 100%;
+  max-width: 300px;
+  border-radius: 5px;
+}
+
+@media (max-width: 600px) {
+  .request-card {
+    padding: 10px;
+  }
+
+  .tab {
+    flex: 1;
+    font-size: 0.9rem;
+  }
+}

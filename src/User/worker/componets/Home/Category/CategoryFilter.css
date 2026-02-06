@@ -1,0 +1,107 @@
+/* Wrapper to hold arrows + scroll area */
+.category-filter-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 700px;
+    height: 60px;
+    background-color:#f0f0f0;
+    min-width: 500px;
+    margin: 20px auto;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+/* Arrow buttons */
+.scroll-button {
+    height: 100%;
+    width: 50px;
+    background-color: #eee;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s
+}
+
+.scroll-button:hover {
+  background-color: #ccc;
+}
+
+/* Scrollable area */
+.category-scroll {
+  display: flex;
+  overflow-x: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* IE and Edge */
+  gap: 8px;
+  flex-grow: 1;
+  padding: 8px 4px;
+}
+
+.category-scroll::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}
+
+/* Category buttons */
+.category-btn {
+  flex-shrink: 0;
+  padding: 5px 12px;
+  font-size: 14px;
+  height: 40px;
+  border: none;
+  border-radius: 15px;
+  background-color: white;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.category-btn.active {
+  background-color: #fcd34d;
+  color: black;
+}
+
+.category-btn:hover {
+  background-color: #ddd;
+  color:black;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .category-filter-wrapper {
+    min-width: 150%;
+    margin:7px auto;
+    max-width: 80%;
+  }
+
+  .scroll-button {
+    height: 100%;
+    width: 60px;
+    background-color: #eee;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s
+  }
+
+  
+  .category-btn:hover {
+    background-color: #ddd;
+  }
+  
+  .category-btn {
+    height: 38px;
+    font-size: 12px;
+    padding: 4px 10px;
+  }
+  .category-btn.active {
+  background-color: #007bff;
+  color: white;
+}
+}

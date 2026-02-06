@@ -1,0 +1,41 @@
+.home-container {
+  padding: 10px;
+}
+
+.home-layout {
+  display: flex;
+  flex-direction: row;
+}
+.Seach-Category{
+    display:flex
+}
+
+.category-filter { 
+  max-width: 250px;
+  display: flex;
+}
+
+.worker-list {
+  flex: 3;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* @media screen and (min-width: 768px) {
+  .category-filter {
+    display: block;
+  }
+} */
+
+@media screen and (max-width: 767px) {
+  .category-filter {
+    order: 1;
+    width: 100%;
+    margin-top: 10px;
+  }
+  .Seach-Category{
+    display:flex;
+    flex-direction:column;
+  }
+}

@@ -1,0 +1,89 @@
+.worker-card {
+  display: flex;
+  background: #fff;
+  border: 1px solid #ddd;
+  width:250px;
+  margin: 10px;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 1px 2px #fcd34d;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px;
+  max-width: 300px;
+}
+.image-container {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+.rating-badge {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background-color: #FFFFFF; /* your requested blue */
+  padding: 3px 6px;
+  border-top-left-radius: 9999px;
+  border-bottom-left-radius: 9999px;
+  border-top-right-radius: 0px;
+  border-bottom-right-radius: 0px;
+  z-index: 10;
+}
+
+.rating-text {
+  font-size: 24px;
+}
+
+
+.worker-image {
+  width: 98%;
+  height: 98%;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.worker-info {
+  text-align: center;
+  padding: 10px;
+}
+
+.worker-info button {
+  margin-top: 10px;
+  padding: 5px 10px;
+  /* background: yellow; */
+  color: black;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+
+@media screen and (max-width: 767px) {
+  .worker-card {
+  display: flex;
+  background: #fff;
+  border: 1px solid #ddd;
+  width:170px;
+  height:300px;
+  margin: 3px;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+  flex-direction: column;
+  align-items: center;
+  padding: 10px;
+  max-width: 300px;
+}
+.worker-info button {
+  margin-top: 10px;
+  padding: 3px 6px;
+  background: #0077cc;
+  width:70px;
+  height:35px;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+}
