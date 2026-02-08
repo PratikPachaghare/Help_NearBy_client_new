@@ -38,7 +38,7 @@ const ProductCard = ({ product }) => {
         </div>
 
         {/* Rating Badge */}
-        <div className="absolute bottom-2 left-2 bg-white/90 backdrop-blur-sm px-1.5 py-0.5 rounded border border-gray-100 flex items-center gap-1 shadow-sm">
+        <div className="absolute bottom-2 left-3 bg-white/90 backdrop-blur-sm px-1.5 py-0.5 rounded border border-gray-100 flex items-center gap-1 shadow-sm">
           <span className="text-[11px] font-bold text-gray-800">{product.rating || '4.2'}</span>
           <span className="text-green-600 text-[10px]">★</span>
         </div>
