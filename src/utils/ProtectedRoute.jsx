@@ -3,6 +3,7 @@ import { useAuth } from './AuthContext';
 
 const ProtectedRoute = ({ allowedRoles }) => {
   const { user } = useAuth();
+  console.log(user);
 
   if (!user) {
     return <Navigate replace to="/login" />;
