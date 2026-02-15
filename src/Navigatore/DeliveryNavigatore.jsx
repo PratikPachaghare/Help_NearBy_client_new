@@ -109,7 +109,7 @@ export default function DeliveryNavigator() {
       <header className="bg-white p-4 shadow-sm z-10 sticky top-0 flex justify-between items-center">
         <div>
           <h1 className="text-xl font-bold text-gray-900">🚀 FastDelivery</h1>
-          <p className="text-xs text-gray-400">{isOnline ? 'Online' : 'Offline'}</p>
+          <p className="text-xs text-gray-500">{isOnline ? 'Online' : 'Offline'}</p>
         </div>
         <div onClick={() => setIsOnline(!isOnline)} className={`px-3 py-1 rounded-full text-xs font-bold border cursor-pointer ${isOnline ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
           {isOnline ? 'ON DUTY' : 'OFF DUTY'}
