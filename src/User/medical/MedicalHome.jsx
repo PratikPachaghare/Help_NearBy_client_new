@@ -1,4 +1,12 @@
 import React from 'react';
+import bandaid from "../../assets/User/Grocery/Bandaid.jpg";
+import first_aid from '../../assets/User/Grocery/First-aid-box.jpg';
+import thermp from '../../assets/User/Grocery/Thermometer.jpg';
+import hand_sanitizer from '../../assets/User/Grocery/DEtol.jpg';
+import Mask from '../../assets/User/Grocery/FaceMask.jpg';
+import antiseptic_cream from '../../assets/User/Grocery/Antiseptic-Cream.jpg';
+
+
 
 const medicalCategories = [
   { id: 1, name: "Medicines", img: "https://cdn-icons-png.flaticon.com/512/2864/2864787.png" },
@@ -9,13 +17,18 @@ const medicalCategories = [
 ];
 
 const medicineData = [
-  { id: 1, name: "Paracetamol 650mg", brand: "Dolo", price: 30, mrp: 45, discount: "33% OFF", img: "https://5.imimg.com/data5/SELLER/Default/2022/9/MQ/XU/XN/150064344/dolo-650-tablet-500x500.jpg", type: "Tablet" },
-  { id: 2, name: "Multivitamin Gold", brand: "Revital", price: 280, mrp: 350, discount: "20% OFF", img: "https://m.media-amazon.com/images/I/61Uun8X8k9L._AC_UF1000,1000_QL80_.jpg", type: "Capsule" },
-  { id: 3, name: "Hand Sanitizer 500ml", brand: "Dettol", price: 199, mrp: 250, discount: "20% OFF", img: "https://m.media-amazon.com/images/I/51+u7D+QWpL.jpg", type: "Liquid" },
-  { id: 4, name: "Vicks Vaporub 50g", brand: "Vicks", price: 145, mrp: 160, discount: "10% OFF", img: "https://m.media-amazon.com/images/I/719hLpNoL7L.jpg", type: "Ointment" },
-  { id: 5, name: "Digital Thermometer", brand: "Dr. Trust", price: 250, mrp: 499, discount: "50% OFF", img: "https://m.media-amazon.com/images/I/61mDOf-Xq3L.jpg", type: "Device" },
-  { id: 6, name: "Face Mask N95", brand: "Wildcraft", price: 120, mrp: 200, discount: "40% OFF", img: "https://m.media-amazon.com/images/I/61u957xXn6L.jpg", type: "Safety" },
+  { id: 1, name: " Bandages & Cotton Rolls", brand: "BAND-AID", price: 30, mrp: 45, discount: "33% OFF", img: bandaid, type: "Safety" },
+  { id: 2, name: "First Aid Kit Supplies", brand: "MANKIND", price: 280, mrp: 350, discount: "20% OFF", img: first_aid, type: "Emergency" },
+  { id: 3, name: "Thermometer", brand: "BONECARE", price: 199, mrp: 250, discount: "20% OFF", img: thermp, type: "Health Monitoring Device" },
+  { id: 4, name: "Hand Sanitizer", brand: "Dettol", price: 145, mrp: 160, discount: "10% OFF", img: hand_sanitizer, type: "Hygiene" },
+  { id: 5, name: "Face Masks ", brand: "Dr. Trust", price: 250, mrp: 499, discount: "50% OFF", img: Mask, type: "Protection" },
+
+  { id: 6, name: "Antiseptic Cream", brand: "Wildcraft", price: 120, mrp: 200, discount: "40% OFF", img: antiseptic_cream, type: "Wound Care" },
 ];
+
+
+
+
 
 export default function MedicalHome() {
   return (
@@ -53,7 +66,7 @@ export default function MedicalHome() {
       {/* 3. Medicine Grid */}
       <div className="max-w-7xl mx-auto px-4 mt-12">
         <div className="flex justify-between items-center mb-8">
-          <h3 className="text-xl font-bold text-gray-800 tracking-tight">Best Sellers & Offers</h3>
+          <h3 className="text-xl font-bold text-gray-800 tracking-tight">Health & Personal Care Essentials </h3>
           <button className="text-blue-600 font-bold text-sm hover:underline">View All</button>
         </div>
 

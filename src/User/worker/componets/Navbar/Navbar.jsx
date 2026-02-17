@@ -21,7 +21,7 @@ const Navbar = () => {
       <div className="navbar-left">
         <NavLink to="/worker" className="logo-link">
           <img src={logo_img} alt="Logo" className="logo-img" />
-          <span className="logo-text">welcom to nearest service</span>
+          <span className="logo-text">Welcome to Nearest Service Hub</span>
         </NavLink>
       </div>
 

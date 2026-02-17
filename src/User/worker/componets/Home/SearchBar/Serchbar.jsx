@@ -78,7 +78,7 @@ const SearchBar = ({ SerachWorkers ,fetchWorkers}) => {
       <form className="search-bar" onSubmit={handleSubmit}>
         <input
           type="text"
-          placeholder="🔍 Search for a worker or skill..."
+          placeholder="🔍 Search for a worker Here"
           value={typeof query === "string" ? query : ""}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => {

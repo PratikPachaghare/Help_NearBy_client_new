@@ -89,7 +89,7 @@ export default function ProductDetails() {
               <span className="text-gray-500 line-through text-lg">₹{product.oldPrice || Math.round(product.price * 1.4)}</span>
               <span className="text-green-700 font-bold text-md">{product.discount || '20% off'}</span>
             </div>
-            <p className="text-xs font-bold text-gray-400 mb-6">+ ₹49 Secured Packaging Fee</p>
+            <p className="text-xs font-bold text-gray-400 mb-6">+ ₹5 Secured Packaging Fee</p>
 
             {/* Offers Section */}
             <div className="mb-8">

@@ -7,7 +7,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState({
     id: "123",
     name: "Test User",
-    role: "delivery" // Isse ProtectedRoute 'user' roles allow karega
+    role: "shopkeeper" // Isse ProtectedRoute 'user' roles allow karega
   }); 
 
   const login = (userData) => setUser(userData);
