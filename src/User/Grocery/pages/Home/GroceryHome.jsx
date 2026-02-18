@@ -225,10 +225,10 @@ export default function GroceryHome() {
         </section>
 
         {/* Product Rows mapped from data.js */}
-        <SectionRow title="Rice, Dal And Masala" products={productData.staples} />
-        <SectionRow title="Soft Skin Everyday" products={productData.dailyNeeds} />
-        <SectionRow title="Snacks & Gums" products={productData.snacks} />
-        <SectionRow title="Cleaning Essentials" products={productData.staples} />
+        <SectionRow title="Daily Cooking Essentials" products={productData.staples} />
+        <SectionRow title="Milk & Dairy Essentials" products={productData.dailyNeeds} />
+        <SectionRow title="Snacks " products={productData.snacks} />
+        {/* <SectionRow title="Cleaning Essentials" products={productData.staples} /> */}
 
       </main>
     </div>
