@@ -1,6 +1,5 @@
 import oil from "../../../assets/User/Grocery/oil.jpg"
 import corn from "../../../assets/User/Grocery/corn.jpg"
-import dets from "../../../assets/User/Grocery/dets.jpg"
 import kurkure from "../../../assets/User/Grocery/KURKURE.jpg"
 import besan from "../../../assets/User/Grocery/besan.jpg"
 import numak from "../../../assets/User/Grocery/numak.jpg"

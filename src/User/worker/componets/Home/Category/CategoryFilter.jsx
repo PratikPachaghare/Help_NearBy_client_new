@@ -1,10 +1,28 @@
 import React, { useRef } from 'react';
 import './CategoryFilter.css';
 
-const categories = [
-  'All', 'Electrician', 'Plumber', 'Carpenter', 'Painter',
-  'Driver', 'Cook', 'Cleaner', 'AC Mechanic'
+export const WORKER_CATEGORIES = [
+  'Electrician',
+  'Plumber',
+  'Electrician + Plumber',
+  'AC Mechanic',
+  'Fridge Repair',
+  'Washing Machine Repair',
+  'RO/Water Purifier',
+  'Carpenter',
+  'Painter',
+  'Mason',
+  'Welder',
+  'Tile Fitting',
+  'Pest Control',
+  'House Cleaning',
+  'Deep Cleaning',
+  'Driver',
+  'Cook',
+  'Gardener'
 ];
+
+const categories = ['All', ...WORKER_CATEGORIES];
 
 const CategoryFilter = ({ selectedCategory, setSelectedCategory }) => {
   const scrollContainerRef = useRef(null);

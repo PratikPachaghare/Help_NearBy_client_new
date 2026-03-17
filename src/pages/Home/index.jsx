@@ -1,6 +1,4 @@
 import React, { useState } from 'react'
-import ApiCalls from '../../utils/ApiCalls';
-import { Endpoints } from '../../utils/Endpiont';
 
 const dumyData =[
   "Item 1",
@@ -11,18 +9,7 @@ const dumyData =[
 ]
 
 export default function Home() {
-  const [list, setList] = useState(dumyData);
-
-  const handleFinish = async () => {
-    const response = ApiCalls('GET',Endpoints?.User?.GetProfile);
-    if(response){
-      console.log("response",response);
-      setList(response);
-    }else{
-      console.log("error");
-    }
-  }
-
+  const [list] = useState(dumyData);
 
   return (
     <div>

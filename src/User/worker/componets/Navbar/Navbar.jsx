@@ -12,12 +12,8 @@ const RAW_USER_DATA = {
 };
 
 const Navbar = () => {
-  // Use raw data instead of useSelector
-  const user = RAW_USER_DATA;
-  const login = RAW_USER_DATA.isLoggedIn;
-
   return (
-    <nav className="navbar bg-amber-300 rounded-xl">
+    <nav className="navbar rounded-xl">
       <div className="navbar-left">
         <NavLink to="/worker" className="logo-link">
           <img src={logo_img} alt="Logo" className="logo-img" />

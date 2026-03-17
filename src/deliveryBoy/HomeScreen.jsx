@@ -15,7 +15,7 @@ export const HomeScreen = ({ availableOrders, onAccept }) => {
               {order.tip > 0 && <span className="text-[10px] text-gray-500 ml-1">(inc. ₹{order.tip} tip)</span>}
             </div>
             <div className="text-xs font-bold text-red-500 bg-red-50 px-2 py-1 rounded">
-              ⏱️ {order.time} to pickup
+              ⏱️ {order.etaText || order.time || '--'}
             </div>
           </div>
 
@@ -23,7 +23,7 @@ export const HomeScreen = ({ availableOrders, onAccept }) => {
             {/* 1. PICKUP SECTION */}
             <div className="flex items-start gap-3 mb-4 relative">
                {/* Timeline Line */}
-               <div className="absolute left-[9px] top-6 bottom-[-20px] w-0.5 bg-gray-200"></div>
+               <div className="absolute left-2.25 top-6 -bottom-5 w-0.5 bg-gray-200"></div>
                
                <div className="w-5 h-5 rounded-full bg-orange-100 border-2 border-orange-500 flex items-center justify-center z-10">
                  <span className="text-[10px] font-bold text-orange-600">S</span>

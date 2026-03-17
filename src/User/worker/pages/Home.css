@@ -1,5 +1,24 @@
 .home-container {
-  padding: 10px;
+  padding: 12px;
+}
+
+.worker-home-hero {
+  background: linear-gradient(120deg, #0f3d4c 0%, #14566c 70%, #2b9fb6 100%);
+  color: #f5fcff;
+  border-radius: 16px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  border: 1px solid #d5e5ec;
+}
+
+.worker-home-hero h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.worker-home-hero p {
+  margin: 4px 0 0;
+  color: #d8ecf3;
 }
 
 .home-layout {
@@ -7,7 +26,8 @@
   flex-direction: row;
 }
 .Seach-Category{
-    display:flex
+    display:flex;
+    gap: 10px;
 }
 
 .category-filter { 
@@ -20,6 +40,10 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
+  border-radius: 14px;
+  background: #f4f8fa;
+  border: 1px solid #dce8ee;
+  padding: 8px;
 }
 
 /* @media screen and (min-width: 768px) {

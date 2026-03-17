@@ -1,163 +1,114 @@
-import React, { useState, useEffect } from "react";
-import "./Home.css";
-import SearchBar from "../componets/Home/SearchBar/Serchbar";
-import CategoryFilter from "../componets/Home/Category/categoryFilter";
-import WorkerCard from "../componets/Home/WorkerCard/WorkerCard";
-import { NavLink } from "react-router-dom";
-import InfiniteScroll from "react-infinite-scroll-component";
-import { Loader2 } from "../componets/Loder/Loader";
-import electrician from "../../../assets/User/Grocery/electrician.jpg";
-import plumber from "../../../assets/User/Grocery/Plumber.webp";
-import carpenter from "../../../assets/User/Grocery/Carpenter.jpg";
-import painter from "../../../assets/User/Grocery/Painter.png";
-import driver from "../../../assets/User/Grocery/Driver.jpg";
-import  cook from "../../../assets/User/Grocery/cook.jpg";
-import cleaner from "../../../assets/User/Grocery/cleaner.jpg";
-import acMechanic from "../../../assets/User/Grocery/ac.jpg";
-
-
-
-const RAW_WORKERS = [
-  {
-    _id: "1",
-    name: "John Doe",
-    categories: "Electrician",
-    rating: 4.8,
-    address: "123 Street, Amravati, Maharashtra",
-    profileImage: electrician,
-    description: "Expert electrician with 5 years experience.",
-    location: { coordinates: [77.7796, 20.9374] }
-  },
-  {
-    _id: "2",
-    name: "Suresh Kumar",
-    categories: "Plumber",
-    rating: 4.2,
-    address: "456 Lane, Amravati, Maharashtra",
-    profileImage: plumber ,
-    description: "Leaking pipes and bathroom fittings expert.",
-    location: { coordinates: [77.7800, 20.9380] }
-  },
-  {
-    _id: "3",
-    name: "Ravi Sharma",
-    categories: "Carpenter",
-    rating: 4.6,
-    address: "12 Teakwood Street, Amravati, Maharashtra",
-    profileImage: carpenter,
-    description: "Skilled carpenter for furniture and wood repairs.",
-    location: { coordinates: [77.7812, 20.9391] }
-  },
-  {
-    _id: "4",
-    name: "Anil Patil",
-    categories: "Painter",
-    rating: 4.4,
-    address: "88 Color Lane, Amravati, Maharashtra",
-    profileImage: painter,
-    description: "Interior and exterior painting specialist.",
-    location: { coordinates: [77.7825, 20.9402] }
-  },
-  {
-
-    _id: "5",
-    name: "Mahesh Verma",
-    categories: "Driver",
-    rating: 4.7,
-    address: "27 Route View Road, Amravati, Maharashtra",
-    profileImage: driver,
-    description: "Experienced local driver for city and outstation travel.",
-    location: { coordinates: [77.7833, 20.9368] }
-  },
-  {
-    _id: "6",
-    name: "Sunita Joshi",
-    categories: "Cook",
-    rating: 4.5,
-    address: "51 Spice Market Street, Amravati, Maharashtra",
-    profileImage: cook,
-    description: "Home-style cook for daily meals and small gatherings.",
-    location: { coordinates: [77.7840, 20.9379] }
-  },
-  {
-    _id: "7",
-    name: "Savita More",
-    categories: "Cleaner",
-    rating: 4.3,
-    address: "39 Fresh Breeze Lane, Amravati, Maharashtra",
-    profileImage: cleaner,
-    description: "Reliable cleaner for homes and office spaces.",
-    location: { coordinates: [77.7851, 20.9387] }
-  },
-  {
-    _id: "8",
-    name: "Arjun Deshmukh",
-    categories: "AC Mechanic",
-    rating: 4.8,
-    address: "73 Cooling Point Street, Amravati, Maharashtra",
-    profileImage: acMechanic,
-    description: "AC installation, servicing, and repair expert.",
-    location: { coordinates: [77.7860, 20.9395] }
-  }
-];
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import './Home.css';
+import SearchBar from '../componets/Home/SearchBar/Serchbar';
+import CategoryFilter, { WORKER_CATEGORIES } from '../componets/Home/Category/CategoryFilter';
+import WorkerCard from '../componets/Home/WorkerCard/WorkerCard';
+import { useNavigate } from 'react-router-dom';
+import InfiniteScroll from 'react-infinite-scroll-component';
+import { Loader2 } from '../componets/Loder/Loader';
+import { apiCall } from '../../../utils/ApiCalls';
+import { Endpoints } from '../../../utils/Endpiont';
 
 const Home = () => {
-  const [workersData, setWorkersData] = useState(RAW_WORKERS);
-  const [selectedCategory, setSelectedCategory] = useState("All");
-  const [hasMore, setHasMore] = useState(false);
+  const navigate = useNavigate();
+  const [workersData, setWorkersData] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [keyword, setKeyword] = useState('');
+  const [hasMore] = useState(false);
 
-  // Mock user data (replacing Redux)
-  const userData = {
-    _id: "user123",
-    name: "Guest User",
-    location: { coordinates: [77.7796, 20.9374] }
-  };
-
-  const categoryWorkers = () => {
-    if (selectedCategory === "All") {
-      setWorkersData(RAW_WORKERS);
-    } else {
-      setWorkersData(RAW_WORKERS.filter(w => w.categories === selectedCategory));
+  const fetchWorkers = useCallback(async () => {
+    try {
+      const params = {};
+      if (selectedCategory !== 'All') params.category = selectedCategory;
+      const resp = await apiCall('GET', Endpoints.Workers?.List || '/workers', {}, params);
+      setWorkersData(resp?.data || []);
+    } catch (error) {
+      console.error(error);
+      setWorkersData([]);
     }
-  };
-
-  const SerachWorkers = (keyword) => {
-    const filtered = RAW_WORKERS.filter(w => 
-      w.name.toLowerCase().includes(keyword.toLowerCase()) || 
-      w.categories.toLowerCase().includes(keyword.toLowerCase())
-    );
-    setWorkersData(filtered);
-  };
+  }, [selectedCategory]);
 
   useEffect(() => {
-    categoryWorkers();
-  }, [selectedCategory]);
+    const timer = setTimeout(() => {
+      fetchWorkers();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [fetchWorkers]);
+
+  const SerachWorkers = (text) => {
+    setKeyword(text || '');
+  };
+
+  const filteredWorkers = useMemo(() => {
+    if (!keyword.trim()) return workersData;
+    return workersData.filter((row) => {
+      const name = row?.userId?.name || '';
+      const categories = Array.isArray(row?.categories) ? row.categories.join(' ') : '';
+      return `${name} ${categories}`.toLowerCase().includes(keyword.toLowerCase());
+    });
+  }, [workersData, keyword]);
+
+  const categoryCards = useMemo(() => {
+    const normalizedKeyword = keyword.trim().toLowerCase();
+    const source = WORKER_CATEGORIES.filter((category) => {
+      if (!normalizedKeyword) return true;
+      return category.toLowerCase().includes(normalizedKeyword);
+    });
+
+    return source.map((category) => {
+      const matchingWorkers = workersData.filter((row) =>
+        Array.isArray(row?.categories) && row.categories.some((c) => c?.toLowerCase() === category.toLowerCase())
+      );
+
+      return {
+        category,
+        workerCount: matchingWorkers.length,
+        previewWorkers: matchingWorkers.slice(0, 5)
+      };
+    });
+  }, [keyword, workersData]);
 
   return (
     <div className="home-container">
+      <div className="worker-home-hero">
+        <h2>Find Verified Local Experts</h2>
+        <p>Browse reliable professionals with category filters and quick request flow.</p>
+      </div>
       <div className="Seach-Category">
-        <SearchBar SerachWorkers={SerachWorkers} fetchWorkers={() => setWorkersData(RAW_WORKERS)} />
+        <SearchBar SerachWorkers={SerachWorkers} fetchWorkers={fetchWorkers} />
         <div className="category-filter">
           <CategoryFilter selectedCategory={selectedCategory} setSelectedCategory={setSelectedCategory} />
         </div>
       </div>
       <div className="home-layout">
-        <InfiniteScroll
-          dataLength={workersData.length}
-          next={() => {}}
-          hasMore={hasMore}
-          loader={<Loader2/>}
-        >
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-5">
+          <h3 className="text-lg font-bold text-slate-800 mb-3">Choose Service Category</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {categoryCards.map((row) => (
+              <button
+                key={row.category}
+                onClick={() => navigate('sendRequest', { state: { category: row.category, availableWorkers: row.previewWorkers } })}
+                className="text-left border border-slate-200 rounded-xl px-4 py-3 bg-slate-50 hover:bg-sky-50 hover:border-sky-300 transition"
+              >
+                <p className="font-semibold text-slate-800">{row.category}</p>
+                <p className="text-xs text-slate-500 mt-1">
+                  {row.workerCount > 0 ? `${row.workerCount} workers available nearby` : 'No live profile yet, request will broadcast'}
+                </p>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <InfiniteScroll dataLength={filteredWorkers.length} next={() => {}} hasMore={hasMore} loader={<Loader2 />}>
           <div className="worker-list">
-            {workersData.map((worker) => (
-              <NavLink 
-                key={worker._id} 
-                to="sendRequest" 
-                state={{ worker, data: userData }} 
-                style={{ textDecoration: "none" }}
+            {filteredWorkers.map((worker) => (
+              <button
+                key={worker._id}
+                onClick={() => navigate('sendRequest', { state: { worker } })}
+                style={{ textDecoration: 'none', background: 'transparent', border: 0, padding: 0, textAlign: 'left' }}
               >
                 <WorkerCard worker={worker} />
-              </NavLink>
+              </button>
             ))}
           </div>
         </InfiniteScroll>

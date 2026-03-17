@@ -2,11 +2,8 @@ import React, { useState } from 'react';
 import './Pendding.css';
 
 // --- MOCK DATA ---
-const IS_WORKER_RAW = true; 
-
-export default function PeddingRequast({ pending = [], handleAccept, handleReject }) {
+export default function PeddingRequast({ pending = [], handleAccept, handleReject, isWorker = false }) {
   const [lightboxImage, setLightboxImage] = useState(null);
-  const isWorker = IS_WORKER_RAW;
 
   return (
     <div className="request-list">
@@ -16,11 +13,11 @@ export default function PeddingRequast({ pending = [], handleAccept, handleRejec
         pending.map((req) => (
           <div key={req._id} className="request-card border p-4 mb-4 rounded shadow">
             <h3 className="font-bold text-lg mb-2">Request Details</h3>
-            <strong>Name: {isWorker ? (req.user?.name || 'User') : (req.worker?.name || 'Worker')}</strong>
-            <p><strong>Address:</strong> {req.user?.address || req.worker?.address || 'N/A'}</p>
+            <strong>Name: {isWorker ? (req.userId?.name || 'User') : (req.workerId?.name || 'Worker')}</strong>
+            <p><strong>Address:</strong> {req.userId?.address || req.workerId?.address || req.serviceAddress || 'N/A'}</p>
             <p><strong>Message:</strong> {req.message}</p>
-            <p><strong>Date:</strong> {req.requestedDate ? new Date(req.requestedDate).toLocaleDateString() : 'N/A'}</p>
-            <p><strong>Time:</strong> {req.requestedTime || 'N/A'}</p>
+            <p><strong>Date:</strong> {req.scheduledDate ? new Date(req.scheduledDate).toLocaleDateString() : 'N/A'}</p>
+            <p><strong>Time:</strong> {req.scheduledTime || 'N/A'}</p>
 
             {req.image && (
               <div className="my-3">

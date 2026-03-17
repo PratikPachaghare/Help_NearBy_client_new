@@ -6,13 +6,18 @@ import WorkerNavigatore from './Navigatore/WorkerNavigatore';
 
 import MedicaleNavigatore from './Navigatore/MedicaleNavigatore';
 import Footer from './layout/Footer/Footer';
-import ShopNavigatore from './Navigatore/ShopNavigatore';
+import ShopNavigatore from './Navigatore/shopNavigatore';
 import { useAuth } from './utils/AuthContext';
-import DeliveryNavigator from './Navigatore/deliveryNavigatore';
+import DeliveryNavigator from './Navigatore/DeliveryNavigatore';
+import AdminNavigatore from './Navigatore/AdminNavigatore';
+import Login from './pages/Auth/Login';
+import Register from './pages/Auth/Register';
 
 // Ye component check karega ki user kaun hai aur usse sahi jagah bhejega
 const RoleBasedRedirect = () => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+
+  if (loading) return <div>Loading...</div>;
 
   if (!user) return <Navigate to="/login" replace />;
   
@@ -22,6 +27,7 @@ const RoleBasedRedirect = () => {
   if (user.role === 'worker') return <Navigate to="/worker-dashboard" replace />;
   if (user.role === 'delivery') return <Navigate to="/delivery-dashboard" replace />;
   if (user.role === 'medical') return <Navigate to="/medical-dashboard" replace />;
+  if (user.role === 'admin') return <Navigate to="/admin-dashboard" replace />;
 
   return <div>Unknown Role</div>;
 };
@@ -31,7 +37,8 @@ const AppRoutes = () => {
     <div>
       <Routes>
         {/* Public Routes */}
-        <Route path="/login" element={<div>Login Page</div>} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
 
         {/* ROOT PATH HANDLER (Ye imp hai) */}
         {/* Agar banda "/" par aata hai, to ye decide karega kahan bhejna hai */}
@@ -63,6 +70,11 @@ const AppRoutes = () => {
         <Route element={<ProtectedRoute allowedRoles={['medical']} />}>
            <Route path="/medical-dashboard/*" element={<MedicaleNavigatore/>} />
         </Route>
+
+          {/* Admin Routes */}
+          <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
+            <Route path="/admin-dashboard/*" element={<AdminNavigatore/>} />
+          </Route>
 
         {/* 404 Page */}
         <Route path="*" element={<div>404 - Not Found</div>} />

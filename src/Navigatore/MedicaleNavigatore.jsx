@@ -1,9 +1,6 @@
-import React from 'react'
+import React from 'react';
+import ShopNavigatore from './shopNavigatore';
 
 export default function MedicaleNavigatore() {
-  return (
-    <div>
-      
-    </div>
-  )
+  return <ShopNavigatore mode="medical" />;
 }

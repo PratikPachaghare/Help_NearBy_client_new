@@ -36,7 +36,7 @@ export default function MedicalHome() {
       
       {/* 1. Prescription Upload Banner */}
       <div className="max-w-7xl mx-auto px-4 pt-6">
-        <div className="bg-gradient-to-r from-blue-700 to-indigo-600 rounded-2xl p-6 text-white flex flex-col md:flex-row items-center justify-between shadow-lg">
+        <div className="bg-linear-to-r from-blue-700 to-indigo-600 rounded-2xl p-6 text-white flex flex-col md:flex-row items-center justify-between shadow-lg">
           <div className="mb-4 md:mb-0">
             <h2 className="text-2xl font-bold">Quick Order with Prescription</h2>
             <p className="text-blue-100 mt-1 text-sm md:text-base">Upload your doctor's note and we'll handle the rest!</p>

@@ -1,9 +1,11 @@
 .navbar {
-  padding: 8px 30px;
+  padding: 10px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border: 1px solid #d7e6ec;
+  background: #ffffff;
+  box-shadow: 0 6px 20px rgba(12, 52, 67, 0.08);
 }
 
 .navbar-left .logo-link {
@@ -20,7 +22,7 @@
 
 .logo-text {
   font-size: 1.5rem;
-  color: black;
+  color: #0f3d4c;
 }
 
 .navbar-right {
@@ -32,14 +34,15 @@
 .nav-links a {
   margin: 0 10px;
   text-decoration: none;
-  color: #333;
-  font-weight: 500;
+  color: #375765;
+  font-weight: 600;
+  padding-bottom: 4px;
 }
 
 .nav-links .active-link {
-  color: #0077cc;
+  color: #0f3d4c;
   font-weight: bold;
-  border-bottom: 2px solid #0077cc;
+  border-bottom: 2px solid #2b9fb6;
 }
 
 .nav-profile {
@@ -70,11 +73,12 @@
 @media (max-width: 768px) {
  .navbar {
   background: white;
-  padding: 15px 30px;
+  padding: 12px 14px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border: 1px solid #d7e6ec;
+  box-shadow: 0 6px 20px rgba(12, 52, 67, 0.08);
 }
 
 .navbar-left .logo-link {
@@ -90,9 +94,9 @@
 }
 
 .logo-text {
-  font-size: 1.5re;
+  font-size: 1.2rem;
   font-weight: bold;
-  color: #0077cc;
+  color: #0f3d4c;
 }
 
 .navbar-right {
@@ -109,9 +113,9 @@
 }
 
 .nav-links .active-link {
-  color: #0077cc;
+  color: #0f3d4c;
   font-weight: bold;
-  border-bottom: 2px solid #0077cc;
+  border-bottom: 2px solid #2b9fb6;
 }
 
 .nav-profile {
