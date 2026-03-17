@@ -1,12 +1,12 @@
 .worker-card {
   display: flex;
   background: #fff;
-  border: 1px solid #ddd;
-  width:250px;
+  border: 1px solid #d9e6ec;
+  width: 320px;
   margin: 10px;
-  border-radius: 10px;
+  border-radius: 14px;
   overflow: hidden;
-  box-shadow: 0 1px 2px #fcd34d;
+  box-shadow: 0 8px 20px rgba(12, 52, 67, 0.08);
   flex-direction: column;
   align-items: center;
   padding: 10px;
@@ -15,37 +15,43 @@
 .image-container {
   position: relative;
   width: 100%;
+  height: 180px;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #f3f4f6;
   display: flex;
   justify-content: center;
+  align-items: center;
 }
 .rating-badge {
   position: absolute;
-  top: -10px;
-  right: -10px;
-  background-color: #FFFFFF; /* your requested blue */
+  top: 8px;
+  right: 8px;
+  background-color: #ffffff;
   padding: 3px 6px;
-  border-top-left-radius: 9999px;
-  border-bottom-left-radius: 9999px;
-  border-top-right-radius: 0px;
-  border-bottom-right-radius: 0px;
+  border-radius: 9999px;
+  border: 1px solid #d6e5eb;
   z-index: 10;
 }
 
 .rating-text {
-  font-size: 24px;
+  font-size: 16px;
+  color: #18404d;
 }
 
 
 .worker-image {
-  width: 98%;
-  height: 98%;
-  object-fit: cover;
-  border-radius: 10px;
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  object-position: center;
 }
 
 .worker-info {
   text-align: center;
   padding: 10px;
+  color: #173844;
 }
 
 .worker-info button {
@@ -63,13 +69,13 @@
   .worker-card {
   display: flex;
   background: #fff;
-  border: 1px solid #ddd;
-  width:170px;
+  border: 1px solid #d9e6ec;
+  width:220px;
   height:300px;
   margin: 3px;
-  border-radius: 10px;
+  border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+  box-shadow: 0 8px 20px rgba(12, 52, 67, 0.08);
   flex-direction: column;
   align-items: center;
   padding: 10px;
@@ -78,7 +84,7 @@
 .worker-info button {
   margin-top: 10px;
   padding: 3px 6px;
-  background: #0077cc;
+  background: #0f3d4c;
   width:70px;
   height:35px;
   color: white;

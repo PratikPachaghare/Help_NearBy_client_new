@@ -12,8 +12,8 @@ export const MyOrdersScreen = ({ myOrders, onOpen }) => (
     ) : (
       myOrders.map(order => (
         <div 
-          key={order.id} 
-          onClick={() => onOpen(order.id)}
+          key={order.taskId} 
+          onClick={() => onOpen(order.taskId)}
           className="bg-white p-4 rounded-xl shadow-sm border-l-4 border-blue-500 mb-3 cursor-pointer hover:shadow-md transition-all">
           
           <div className="flex justify-between items-center mb-2">
@@ -25,6 +25,7 @@ export const MyOrdersScreen = ({ myOrders, onOpen }) => (
              <div>
                 <h3 className="font-bold text-sm">{order.shopName}</h3>
                 <p className="text-xs text-gray-500">to {order.customerName}</p>
+               <p className="text-[11px] text-gray-400 mt-1">{order.shopDist} pickup • {order.custDist} trip • {order.tripEtaText}</p>
              </div>
              <div className="text-right">
                 <span className="text-blue-600 font-bold text-sm">Open Details →</span>

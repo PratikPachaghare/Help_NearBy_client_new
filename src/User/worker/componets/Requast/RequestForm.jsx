@@ -1,113 +1,110 @@
-import React, { useState, useRef } from "react";
-import "./RequestForm.css";
-import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
-import { useLocation, useNavigate } from "react-router-dom";
-import CardShow from "./workerDetailCard";
-import imageCompression from "browser-image-compression";
-import Loader from "../Loder/Loader";
+import { useRef, useState } from 'react';
+import './RequestForm.css';
+import { MapContainer, Marker, TileLayer, useMapEvents } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import { useLocation, useNavigate } from 'react-router-dom';
+import CardShow from './workerDetailCard';
+import Loader from '../Loder/Loader';
+import { apiCall } from '../../../../utils/ApiCalls';
 
-// Fallback data so the page never crashes if "location.state" is empty
 const MOCK_WORKER = {
-  _id: "mock_1",
-  name: "Service Provider",
-  categories: "General",
-  address: "Amravati, Maharashtra",
-  profileImage: "https://via.placeholder.com/150",
-  rating: 4.5
+  _id: 'mock_1',
+  userId: { name: 'Service Provider', address: 'Amravati, Maharashtra' },
+  categories: ['General'],
+  ratingAvg: 4.5
 };
 
+const markerIcon = L.icon({
+  iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41]
+});
+
 const RequestForm = () => {
-  const [Lodding, setLodding] = useState(false);
-  const [LoddingLoc, setLoddingLoc] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [loadingLoc, setLoadingLoc] = useState(false);
   const location = useLocation();
-  const navigate = useNavigate(); // Renamed from 'navigator' to avoid conflict with window.navigator
+  const navigate = useNavigate();
+  const { worker = null, category: categoryFromCard = '', availableWorkers = [] } = location.state || {};
+  const resolvedWorker = worker || MOCK_WORKER;
+  const selectedCategory = categoryFromCard || (Array.isArray(resolvedWorker?.categories) ? resolvedWorker.categories[0] : resolvedWorker?.categories) || 'General';
 
-  // Safety Check: Use mock data if state is null
-  const { worker = MOCK_WORKER, data = { _id: "u1", address: "Local" } } = location.state || {};
-
-  const [image, setImage] = useState(null);
-  const [addressName, setAddressName] = useState("Amravati");
+  const [addressName, setAddressName] = useState(worker?.userId?.address || 'Amravati');
   const [form, setForm] = useState({
-    message: "",
-    date: "",
-    time: "",
-    ProblamImage: "",
-    coordinates: [77.7796, 20.9374],
+    message: '',
+    date: '',
+    time: '',
+    coordinates: [77.7796, 20.9374]
   });
 
   const mapRef = useRef(null);
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   const getAddressFromCoords = async (lat, lng) => {
     try {
       const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
       const result = await res.json();
-      setAddressName(result.display_name || "Location Selected");
-    } catch (err) {
-      console.log("Map service offline, using default address.");
+      setAddressName(result.display_name || 'Location Selected');
+    } catch (error) {
+      console.log(error);
     }
   };
 
-  const handleImage = async (e) => {
-    const imageFile = e.target.files[0];
-    if (imageFile) {
-      const options = { maxSizeMB: 0.4, maxWidthOrHeight: 800, useWebWorker: true };
-      try {
-        const compressedFile = await imageCompression(imageFile, options);
-        setForm({ ...form, ProblamImage: compressedFile });
-        setImage(URL.createObjectURL(compressedFile));
-      } catch (err) { console.error(err); }
-    }
-  };
-
-  const markerIcon = L.icon({
-    iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-  });
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setLodding(true);
-    
-    // Bypassing Backend: Simulation
-    console.log("Simulating Request Submission...", { workerId: worker._id, form });
-    
-    setTimeout(() => {
-      setLodding(false);
-      alert("Request Sent (Simulated Mode)");
-      navigate("/request"); // Correct use of navigate
-    }, 1000);
+    setLoading(true);
+    try {
+      const payload = {
+        workerId: worker ? (resolvedWorker.userId?._id || resolvedWorker.userId || resolvedWorker._id) : undefined,
+        category: selectedCategory,
+        message: form.message,
+        scheduledDate: form.date,
+        scheduledTime: form.time,
+        serviceAddress: addressName,
+        lng: form.coordinates[0],
+        lat: form.coordinates[1]
+      };
+      await apiCall('POST', '/service-requests', payload);
+      alert(worker ? 'Request sent to selected worker' : 'Request broadcast to nearby matching workers');
+      navigate('/worker/request');
+    } catch (error) {
+      alert(error?.response?.data?.message || 'Failed to send request');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const detectMyLocation = () => {
-    setLoddingLoc(true);
-    // Fixed: using window.navigator to get geolocation
-    if (window.navigator.geolocation) {
-      window.navigator.geolocation.getCurrentPosition((position) => {
+    setLoadingLoc(true);
+    if (!window.navigator.geolocation) {
+      setLoadingLoc(false);
+      return;
+    }
+
+    window.navigator.geolocation.getCurrentPosition(
+      (position) => {
         const { latitude, longitude } = position.coords;
         setForm((prev) => ({ ...prev, coordinates: [longitude, latitude] }));
-        if (mapRef.current) mapRef.current.setView([latitude, longitude], 13);
+        mapRef.current?.setView([latitude, longitude], 13);
         getAddressFromCoords(latitude, longitude);
-        setLoddingLoc(false);
-      }, () => setLoddingLoc(false));
-    } else {
-      alert("Geolocation not supported.");
-      setLoddingLoc(false);
-    }
+        setLoadingLoc(false);
+      },
+      () => setLoadingLoc(false)
+    );
   };
 
   function LocationMarker() {
     useMapEvents({
       click(e) {
-        setForm({ ...form, coordinates: [e.latlng.lng, e.latlng.lat] });
-      },
+        setForm((prev) => ({ ...prev, coordinates: [e.latlng.lng, e.latlng.lat] }));
+        getAddressFromCoords(e.latlng.lat, e.latlng.lng);
+      }
     });
+
     return <Marker position={[form.coordinates[1], form.coordinates[0]]} icon={markerIcon} />;
   }
 
@@ -115,19 +112,25 @@ const RequestForm = () => {
     <div>
       <CardShow worker={worker} />
       <div className="request-form-container">
-        {Lodding && <Loader />}
+        {loading && <Loader />}
         <form className="request-form" onSubmit={handleSubmit}>
           <h2>Request a Service</h2>
           <div className="main-container-deckstop">
             <div className="Left">
               <label>Worker:</label>
-              <input value={worker?.name || ""} disabled />
+              <input value={worker ? (resolvedWorker?.userId?.name || resolvedWorker?.name || '') : 'Auto-match nearby workers'} disabled />
 
               <label>Category:</label>
-              <input value={worker?.categories || ""} disabled />
+              <input value={selectedCategory} disabled />
+
+              {!worker && availableWorkers.length > 0 ? (
+                <div className="text-xs text-slate-600 bg-slate-50 border border-slate-200 rounded p-2">
+                  Preview workers: {availableWorkers.map((row) => row?.userId?.name).filter(Boolean).join(', ')}
+                </div>
+              ) : null}
 
               <label>Message:</label>
-              <textarea name="message" value={form.message} onChange={handleChange} rows={5} />
+              <textarea name="message" value={form.message} onChange={handleChange} rows={5} required />
 
               <label>Date:</label>
               <input type="date" name="date" required onChange={handleChange} />
@@ -139,12 +142,14 @@ const RequestForm = () => {
             <div className="Right">
               <div className="map-section">
                 <label>Service Location:</label>
-                <div style={{ height: "200px", background: "#eee", borderRadius: "8px", overflow: "hidden" }}>
+                <div style={{ height: '200px', background: '#eee', borderRadius: '8px', overflow: 'hidden' }}>
                   <MapContainer
                     center={[form.coordinates[1], form.coordinates[0]]}
                     zoom={10}
                     className="map"
-                    whenCreated={(map) => (mapRef.current = map)}
+                    whenReady={(event) => {
+                      mapRef.current = event.target;
+                    }}
                   >
                     <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                     <LocationMarker />
@@ -152,7 +157,7 @@ const RequestForm = () => {
                 </div>
                 <input type="text" value={addressName} disabled className="mt-2" />
                 <button type="button" className="detect-btn mt-2" onClick={detectMyLocation}>
-                  {LoddingLoc ? "Locating..." : "Detect My Location"}
+                  {loadingLoc ? 'Locating...' : 'Detect My Location'}
                 </button>
               </div>
             </div>

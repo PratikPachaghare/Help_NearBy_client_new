@@ -1,139 +1,141 @@
-import React, { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { productData } from './data'; // Using your raw data
+import { CreditCard, Smartphone, Wallet } from 'lucide-react';
+import { apiCall } from '../../../utils/ApiCalls';
+import { Endpoints } from '../../../utils/Endpiont';
 
-export default function GroceryCart() {
+export default function GroceryCart({ mode = 'grocery' }) {
   const navigate = useNavigate();
-  
-  // Simulating cart state with some raw data items
-  const [cartItems, setCartItems] = useState([
-    { ...productData.staples[0], qty: 1 },
-    { ...productData.dailyNeeds[1], qty: 2 },
-    { ...productData.snacks[0], qty: 1 },
-  ]);
+  const [cart, setCart] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [placing, setPlacing] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState('upi');
 
-  const updateQty = (id, delta) => {
-    setCartItems(prev => prev.map(item => 
-      item.id === id ? { ...item, qty: Math.max(0, item.qty + delta) } : item
-    ).filter(item => item.qty > 0));
+  const fetchCart = async () => {
+    setLoading(true);
+    try {
+      const resp = await apiCall('GET', Endpoints.Cart.Get);
+      setCart(resp?.data || null);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const totalOriginalPrice = cartItems.reduce((acc, item) => acc + (item.oldPrice || Math.round(item.price * 1.4)) * item.qty, 0);
-  const totalDiscountedPrice = cartItems.reduce((acc, item) => acc + item.price * item.qty, 0);
-  const savings = totalOriginalPrice - totalDiscountedPrice;
+  useEffect(() => {
+    fetchCart();
+  }, []);
+
+  const updateQty = async (itemId, nextQty) => {
+    if (nextQty <= 0) {
+      await apiCall('DELETE', Endpoints.Cart.RemoveItem(itemId));
+    } else {
+      await apiCall('PATCH', Endpoints.Cart.UpdateItem(itemId), { qty: nextQty });
+    }
+    fetchCart();
+  };
+
+  const placeOrder = async () => {
+    setPlacing(true);
+    try {
+      const resp = await apiCall('POST', Endpoints.Orders.Create, {
+        shippingAddress: 'Default user address',
+        paymentMethod
+      });
+      alert(`Order created: ${resp?.data?.order?.orderNumber || ''}`);
+      navigate(`/${mode}/myOrders`);
+    } catch (err) {
+      alert(err?.response?.data?.message || 'Failed to place order');
+    } finally {
+      setPlacing(false);
+    }
+  };
+
+  const items = useMemo(() => cart?.items || [], [cart]);
+
+  if (loading) return <div className="p-6">Loading cart...</div>;
 
   return (
-    <div className="min-h-screen bg-[#F1F3F6] pb-10">
-      {/* Small Sub-Header */}
-      <div className="bg-white shadow-sm py-3 px-4 mb-4">
-        <div className="max-w-6xl mx-auto flex gap-8 font-bold text-sm text-[#2874f0]">
-          <span className="border-b-2 border-[#2874f0] pb-2 cursor-pointer">FreshMart (3)</span>
-          <span className="text-gray-400 cursor-not-allowed">Grocery (0)</span>
-        </div>
-      </div>
-
-      <div className="max-w-6xl mx-auto flex flex-col lg:flex-row gap-4 px-2">
-        
-        {/* Left Section: Items List */}
-        <div className="flex-1">
-          {/* Address Bar */}
-          <div className="bg-white p-4 rounded-sm shadow-sm mb-4 flex justify-between items-center">
-            <span className="text-sm">From Saved Address: <span className="font-bold">Mumbai 400001</span></span>
-            <button className="border border-gray-200 text-[#2874f0] px-4 py-2 rounded-sm text-xs font-bold shadow-sm">Enter Pincode</button>
-          </div>
-
-          {/* Cart Items */}
-          <div className="bg-white rounded-sm shadow-sm overflow-hidden">
-            {cartItems.map((item) => (
-              <div key={item.id} className="p-4 border-b border-gray-100 flex gap-6">
-                {/* Image and Qty Toggle */}
-                <div className="flex flex-col items-center gap-4">
-                  <div className="w-28 h-28 flex items-center justify-center">
-                    <img src={item.image} alt={item.name} className="max-h-full max-w-full object-contain" />
-                  </div>
-                  <div className="flex items-center gap-0">
-                    <button 
-                      onClick={() => updateQty(item.id, -1)}
-                      className="w-7 h-7 border border-gray-300 rounded-full flex items-center justify-center font-bold hover:bg-gray-50">-</button>
-                    <input type="text" value={item.qty} readOnly className="w-10 text-center text-sm font-bold outline-none" />
-                    <button 
-                      onClick={() => updateQty(item.id, 1)}
-                      className="w-7 h-7 border border-gray-300 rounded-full flex items-center justify-center font-bold hover:bg-gray-50">+</button>
+    <div className="min-h-screen bg-[#f3f8fa] p-4">
+      <div className="max-w-5xl mx-auto grid lg:grid-cols-[2fr_1fr] gap-4">
+        <div className="bg-white rounded-xl shadow border border-[#dce8ee]">
+          <div className="p-4 border-b font-bold">Cart Items ({items.length})</div>
+          {items.length === 0 ? (
+            <div className="p-6 text-gray-500">Your cart is empty</div>
+          ) : (
+            items.map((item) => (
+              <div key={item._id} className="p-4 border-b flex justify-between items-center gap-4">
+                <div className="flex items-center gap-3">
+                  <img
+                    src={item.productId?.images?.[0] || '/placeholder.png'}
+                    alt={item.productId?.name || 'Product'}
+                    className="h-16 w-16 rounded-lg object-cover border border-slate-200"
+                  />
+                  <div>
+                    <p className="font-semibold">{item.productId?.name || 'Product'}</p>
+                    <p className="text-xs text-slate-500">{item.productId?.category || 'General'}</p>
+                    <p className="text-sm text-gray-600">Rs {item.unitPrice} x {item.qty}</p>
+                    <p className="text-sm font-semibold text-slate-800">Item Total: Rs {item.totalPrice}</p>
                   </div>
                 </div>
-
-                {/* Details */}
-                <div className="flex-1">
-                  <h3 className="text-md font-medium text-gray-900 line-clamp-1 hover:text-[#2874f0] cursor-pointer">
-                    {item.name}
-                  </h3>
-                  <p className="text-xs text-gray-500 mt-1">{item.weight}</p>
-                  <p className="text-xs text-gray-400 mb-2">Seller: FreshMart Retail</p>
-                  
-                  <div className="flex items-center gap-2 mb-4">
-                    <span className="text-gray-400 line-through text-sm">₹{(item.oldPrice || Math.round(item.price * 1.4)) * item.qty}</span>
-                    <span className="text-lg font-bold">₹{item.price * item.qty}</span>
-                    <span className="text-green-600 text-xs font-bold">{item.discount || '20% Off'}</span>
-                  </div>
-
-                  <div className="flex gap-4">
-                    <button className="text-sm font-bold uppercase hover:text-[#2874f0]">Save for later</button>
-                    <button 
-                      onClick={() => updateQty(item.id, -item.qty)}
-                      className="text-sm font-bold uppercase hover:text-red-500">Remove</button>
-                  </div>
-                </div>
-
-                <div className="text-xs font-bold w-32">
-                  Delivery by Tomorrow | <span className="text-green-600 font-normal">Free</span>
+                <div className="flex items-center gap-2">
+                  <button onClick={() => updateQty(item._id, item.qty - 1)} className="h-8 w-8 border rounded-lg text-lg leading-none">-</button>
+                  <span className="min-w-6 text-center font-semibold">{item.qty}</span>
+                  <button onClick={() => updateQty(item._id, item.qty + 1)} className="h-8 w-8 border rounded-lg text-lg leading-none">+</button>
                 </div>
               </div>
-            ))}
+            ))
+          )}
+        </div>
 
-            {/* Sticky Place Order Button */}
-            <div className="p-4 flex justify-end bg-white shadow-[0_-2px_10px_rgba(0,0,0,0.05)] sticky bottom-0">
-              <button className="bg-[#fb641b] text-white px-12 py-3 rounded-sm font-bold text-sm shadow-md uppercase">
-                Place Order
+        <div className="bg-white rounded-xl shadow p-4 h-fit sticky top-20 border border-[#dce8ee]">
+          <h3 className="font-bold mb-3">Summary</h3>
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between"><span>Subtotal</span><span>Rs {cart?.subtotal || 0}</span></div>
+            <div className="flex justify-between"><span>Delivery</span><span>Rs {cart?.deliveryFee || 0}</span></div>
+            <div className="flex justify-between"><span>Discount</span><span>- Rs {cart?.discount || 0}</span></div>
+            <div className="border-t pt-2 flex justify-between font-bold"><span>Total</span><span>Rs {cart?.total || 0}</span></div>
+          </div>
+
+          <div className="mt-4">
+            <p className="text-sm font-semibold text-slate-800 mb-2">Payment Method</p>
+            <div className="grid grid-cols-1 gap-2">
+              <button
+                type="button"
+                onClick={() => setPaymentMethod('upi')}
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg border ${paymentMethod === 'upi' ? 'border-[#0f3d4c] bg-[#eef5f8]' : 'border-slate-200 bg-white'}`}
+              >
+                <Smartphone size={18} className="text-[#14566c]" />
+                <span className="text-sm font-medium">UPI (PhonePe / GPay / Paytm)</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setPaymentMethod('card')}
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg border ${paymentMethod === 'card' ? 'border-[#0f3d4c] bg-[#eef5f8]' : 'border-slate-200 bg-white'}`}
+              >
+                <CreditCard size={18} className="text-[#14566c]" />
+                <span className="text-sm font-medium">Credit / Debit Card</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setPaymentMethod('cod')}
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg border ${paymentMethod === 'cod' ? 'border-[#0f3d4c] bg-[#eef5f8]' : 'border-slate-200 bg-white'}`}
+              >
+                <Wallet size={18} className="text-[#14566c]" />
+                <span className="text-sm font-medium">Cash on Delivery</span>
               </button>
             </div>
           </div>
-        </div>
 
-        {/* Right Section: Price Details */}
-        <div className="w-full lg:w-[380px]">
-          <div className="bg-white rounded-sm shadow-sm sticky top-24">
-            <h3 className="text-gray-500 font-bold uppercase text-sm p-4 border-b border-gray-100">Price Details</h3>
-            
-            <div className="p-4 space-y-4">
-              <div className="flex justify-between text-sm">
-                <span>Price ({cartItems.length} items)</span>
-                <span>₹{totalOriginalPrice}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span>Discount</span>
-                <span className="text-green-600">- ₹{savings}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span>Delivery Charges</span>
-                <span className="text-green-600">FREE</span>
-              </div>
-              
-              <div className="flex justify-between text-lg font-bold border-t border-dashed border-gray-200 pt-4 mt-2">
-                <span>Total Amount</span>
-                <span>₹{totalDiscountedPrice}</span>
-              </div>
-              
-              <div className="text-green-600 font-bold text-sm pt-2">
-                You will save ₹{savings} on this order
-              </div>
-            </div>
-
-            <div className="p-4 flex items-center gap-2 text-[11px] text-gray-500 font-bold border-t border-gray-100 uppercase">
-              🛡️ Safe and Secure Payments. Easy returns.
-            </div>
-          </div>
+          <button
+            onClick={placeOrder}
+            disabled={!items.length || placing}
+            className="w-full mt-4 bg-[#0f3d4c] text-white py-3 rounded font-semibold disabled:opacity-60"
+          >
+            {placing ? 'Placing...' : 'Place Order'}
+          </button>
         </div>
-        
       </div>
     </div>
   );

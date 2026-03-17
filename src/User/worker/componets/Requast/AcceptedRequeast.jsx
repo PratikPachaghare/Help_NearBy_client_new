@@ -5,7 +5,6 @@ import "leaflet/dist/leaflet.css";
 import "./Accept.css";
 
 // --- MOCK DATA (Replaces Redux) ---
-const IS_WORKER_RAW = true; // Set to false to see User View
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -30,9 +29,21 @@ function openGoogleMapsDirection(wLat, wLng, uLat, uLng) {
   window.open(url, "_blank", "noopener,noreferrer");
 }
 
-export default function AcceptedRequeast({ accepted = [], workerLocation = [20.9374, 77.7796] }) {
-  // Use raw data instead of useSelector
-  const isWorker = IS_WORKER_RAW;
+export default function AcceptedRequeast({ accepted = [], workerLocation = [20.9374, 77.7796], isWorker = false, onStatusUpdate }) {
+
+  const nextStatus = (status) => {
+    if (status === 'accepted') return 'arrived';
+    if (status === 'arrived') return 'work_started';
+    if (status === 'work_started') return 'completed';
+    return null;
+  };
+
+  const statusLabel = (status) => {
+    if (status === 'accepted') return 'Mark Arrived';
+    if (status === 'arrived') return 'Start Work';
+    if (status === 'work_started') return 'Complete Job';
+    return '';
+  };
 
   return (
     <div className="accepted-list">
@@ -41,8 +52,8 @@ export default function AcceptedRequeast({ accepted = [], workerLocation = [20.9
       ) : (
         accepted.map((req) => {
           // Fallback coordinates if data is missing
-          const userLat = req.location?.coordinates?.[0] || 20.9374;
-          const userLng = req.location?.coordinates?.[1] || 77.7796;
+          const userLng = req.serviceLocation?.coordinates?.[0] || 77.7796;
+          const userLat = req.serviceLocation?.coordinates?.[1] || 20.9374;
           const workerLat = workerLocation[0];
           const workerLng = workerLocation[1];
 
@@ -53,11 +64,11 @@ export default function AcceptedRequeast({ accepted = [], workerLocation = [20.9
               <div className="flex flex-wrap gap-5 justify-between">
                 <div className="details flex-1 min-w-[280px]">
                   <h3 className="font-bold text-lg mb-2">{isWorker ? "User Details" : "Worker Details"}</h3>
-                  <strong>Name: {isWorker ? req.user?.name : req.worker?.name}</strong>
-                  <p><strong>Phone:</strong> {isWorker ? req.user?.phone : req.worker?.phone}</p>
-                  <p><strong>Address:</strong> {isWorker ? req.user?.address : req.worker?.address}</p>
+                  <strong>Name: {isWorker ? req.userId?.name : req.workerId?.name}</strong>
+                  <p><strong>Phone:</strong> {isWorker ? req.userId?.phone : req.workerId?.phone}</p>
+                  <p><strong>Address:</strong> {isWorker ? req.userId?.address : req.workerId?.address}</p>
                   <p><strong>Message:</strong> {req.message}</p>
-                  <p><strong>Date:</strong> {new Date(req.requestedDate).toLocaleDateString()}</p>
+                  <p><strong>Date:</strong> {new Date(req.scheduledDate).toLocaleDateString()}</p>
                   
                   <button
                     className="mt-3 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
@@ -65,6 +76,15 @@ export default function AcceptedRequeast({ accepted = [], workerLocation = [20.9
                   >
                     Track on Google Maps
                   </button>
+
+                  {isWorker && nextStatus(req.status) ? (
+                    <button
+                      className="mt-3 ml-2 bg-emerald-600 text-white px-4 py-2 rounded hover:bg-emerald-700"
+                      onClick={() => onStatusUpdate?.(req._id, nextStatus(req.status))}
+                    >
+                      {statusLabel(req.status)}
+                    </button>
+                  ) : null}
                 </div>
 
                 {req.image && (

@@ -1,155 +1,228 @@
-import React, { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { HomeScreen } from '../deliveryBoy/HomeScreen';
 import { MyOrdersScreen } from '../deliveryBoy/MyOrdersScreen';
 import { HistoryScreen } from '../deliveryBoy/HistoryScreen';
 import { ProfileScreen } from '../deliveryBoy/ProfileScreen';
 import { ActiveOrderScreen } from '../deliveryBoy/ActiveDeliveryScreen';
+import { apiCall } from '../utils/ApiCalls';
+import { Endpoints } from '../utils/Endpiont';
+import { useAuth } from '../utils/AuthContext';
 
-// --- ENHANCED DATA WITH KM BREAKDOWN ---
-const MOCK_NEW_ORDERS = [
-  { 
-    id: 101, 
-    shopName: 'Pizza Hut', 
-    shopAddress: 'MG Road, Sector 14', 
-    shopDist: '2.5 km', // Distance from you to shop
-    
-    customerName: 'Rahul Sharma', 
-    customerAddress: 'Flat 402, Sunshine Appt', 
-    custDist: '4.0 km', // Distance from shop to user
-    
-    price: 150, tip: 20, 
-    items: '2x Large Pizza, 1x Coke', 
-    paymentMethod: 'Prepaid', otp: '4589',
-    time: '20 mins'
-  },
-  { 
-    id: 102, 
-    shopName: 'Apollo Pharmacy', 
-    shopAddress: 'City Mall', 
-    shopDist: '1.0 km',
-    
-    customerName: 'Priya Verma', 
-    customerAddress: 'H.No 55, Green Park', 
-    custDist: '1.2 km',
-    
-    price: 80, tip: 0, 
-    items: 'Medicine Package', 
-    paymentMethod: 'Cash', otp: '1122',
-    time: '10 mins'
-  }
-];
+const stepFromStatus = {
+  assigned: 1,
+  accepted: 1,
+  arrived_shop: 2,
+  picked: 3,
+  arrived_customer: 4,
+  completed: 5
+};
+
+function mapTaskToUi(task) {
+  const order = task.orderId || {};
+  const shopMeta = task.meta?.shop || {};
+  const customerMeta = task.meta?.customer || {};
+  const metrics = task.meta?.metrics || {};
+
+  const shopDistance = metrics.pickupDistanceKm;
+  const tripDistance = metrics.tripDistanceKm;
+  const eta = metrics.estimatedPickupMinutes;
+  const tripEta = metrics.estimatedTripMinutes;
+
+  return {
+    taskId: task._id,
+    orderId: order._id,
+    id: order.orderNumber || order._id || task._id,
+    shopName: shopMeta.name || 'Assigned Shop',
+    shopAddress: shopMeta.address || 'Pickup point',
+    shopDist: shopDistance !== null && shopDistance !== undefined ? `${shopDistance} km` : 'N/A',
+    customerName: customerMeta.name || 'Customer',
+    customerPhone: customerMeta.phone || '',
+    customerAddress: customerMeta.address || order.shippingAddress || 'Delivery address',
+    custDist: tripDistance !== null && tripDistance !== undefined ? `${tripDistance} km` : 'N/A',
+    etaText: eta !== null && eta !== undefined ? `${eta} min to pickup` : '--',
+    tripEtaText: tripEta !== null && tripEta !== undefined ? `${tripEta} min trip` : '--',
+    items: `${order.items?.length || 0} items`,
+    paymentMethod: String(order.paymentMethod || 'cod').toUpperCase(),
+    otp: '',
+    status: task.status,
+    step: stepFromStatus[task.status] || 1,
+    amount: order.grandTotal || 0,
+    shopPhone: shopMeta.phone || '',
+    shopContactName: shopMeta.contactName || shopMeta.name || 'Shopkeeper',
+    destinationLat: customerMeta.location?.lat || 20.9374,
+    destinationLng: customerMeta.location?.lng || 77.7796,
+    pickupLat: shopMeta.location?.lat || null,
+    pickupLng: shopMeta.location?.lng || null
+  };
+}
 
 export default function DeliveryNavigator() {
-  const [activeTab, setActiveTab] = useState('home'); // home, myorders, history, profile
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('home');
   const [isOnline, setIsOnline] = useState(true);
-  
-  // STATE
-  const [availableOrders, setAvailableOrders] = useState(MOCK_NEW_ORDERS);
-  const [myOrders, setMyOrders] = useState([]); // Array for multiple orders
-  const [selectedOrderId, setSelectedOrderId] = useState(null); // To show detailed screen
-  const [earnings, setEarnings] = useState(1200);
+  const [availableOrders, setAvailableOrders] = useState([]);
+  const [myOrders, setMyOrders] = useState([]);
+  const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [history, setHistory] = useState([]);
+  const [earnings, setEarnings] = useState(0);
 
-  // 1. ACCEPT ORDER
-  const handleAccept = (order) => {
-    setAvailableOrders(prev => prev.filter(o => o.id !== order.id));
-    // Add to My Orders with initial status
-    setMyOrders(prev => [...prev, { ...order, status: 'Accepted', step: 1 }]);
-    alert("Order Accepted! Added to 'My Orders'.");
-  };
+  const refreshTasks = async () => {
+    try {
+      const [availableResp, myResp] = await Promise.all([
+        apiCall('GET', Endpoints.Delivery.Available),
+        apiCall('GET', Endpoints.Delivery.MyTasks)
+      ]);
 
-  // 2. OPEN SPECIFIC ORDER
-  const handleOpenOrder = (orderId) => {
-    setSelectedOrderId(orderId);
-  };
-
-  // 3. BACK TO LIST
-  const handleBackToList = () => {
-    setSelectedOrderId(null);
-  };
-
-  // 4. UPDATE STATUS (Inside specific order)
-  const handleStatusUpdate = (orderId, newStatus, step) => {
-    if (newStatus === 'COMPLETED') {
-      // Find the order to calculate earnings
-      const order = myOrders.find(o => o.id === orderId);
-      const total = order.price + order.tip;
-      
-      setEarnings(prev => prev + total);
-      setHistory(prev => [{...order, status: 'Delivered', amount: total, date: 'Just Now'}, ...prev]);
-      
-      // Remove from active list
-      setMyOrders(prev => prev.filter(o => o.id !== orderId));
-      setSelectedOrderId(null);
-      alert(`✅ Order Delivered! You earned ₹${total}`);
-    } else {
-      // Update status locally
-      setMyOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus, step: step } : o));
+      setAvailableOrders((availableResp?.data || []).map(mapTaskToUi));
+      setMyOrders((myResp?.data || []).map(mapTaskToUi));
+    } catch (err) {
+      console.error(err);
     }
   };
 
-  // RENDER LOGIC
-  // If a specific order is selected, show that screen ONLY (Full Screen Mode)
-  const activeOrderData = myOrders.find(o => o.id === selectedOrderId);
-  
+  useEffect(() => {
+    if (!isOnline) {
+      return;
+    }
+
+    const bootTimer = setTimeout(() => {
+      refreshTasks();
+    }, 0);
+    const interval = setInterval(refreshTasks, 8000);
+    return () => {
+      clearTimeout(bootTimer);
+      clearInterval(interval);
+    };
+  }, [isOnline]);
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
+  const toggleOnline = async () => {
+    const next = !isOnline;
+    setIsOnline(next);
+    try {
+      await apiCall('PATCH', Endpoints.Delivery.Online, { online: next });
+      if (next) {
+        refreshTasks();
+      } else {
+        setAvailableOrders([]);
+        setMyOrders([]);
+        setSelectedOrderId(null);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleAccept = async (order) => {
+    try {
+      await apiCall('PATCH', Endpoints.Delivery.AcceptTask(order.taskId));
+      await refreshTasks();
+      setActiveTab('myorders');
+    } catch (err) {
+      alert(err?.response?.data?.message || 'Failed to accept');
+    }
+  };
+
+  const handleStatusUpdate = async (taskId, status, step) => {
+    try {
+      await apiCall('PATCH', Endpoints.Delivery.UpdateTask(taskId), { status });
+      setMyOrders((prev) => prev.map((o) => (o.taskId === taskId ? { ...o, status, step } : o)));
+      await refreshTasks();
+    } catch (err) {
+      alert(err?.response?.data?.message || 'Failed status update');
+    }
+  };
+
+  const handleVerifyOtp = async (taskId, otp) => {
+    try {
+      await apiCall('POST', Endpoints.Delivery.VerifyOtp(taskId), { otp });
+      const done = myOrders.find((o) => o.taskId === taskId);
+      if (done) {
+        setHistory((prev) => [{ ...done, status: 'completed', date: new Date().toLocaleString() }, ...prev]);
+        setEarnings((e) => e + Number(done.amount || 0));
+      }
+      await refreshTasks();
+      setSelectedOrderId(null);
+    } catch (err) {
+      alert(err?.response?.data?.message || 'Invalid OTP');
+    }
+  };
+
+  const handleLocationTick = async (order) => {
+    if (!order?.orderId) return;
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+      try {
+        await apiCall('POST', Endpoints.Tracking.UpdateLocation, {
+          contextType: 'order',
+          contextId: order.orderId,
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+          accuracy: pos.coords.accuracy,
+          speed: pos.coords.speed || 0,
+          heading: pos.coords.heading || 0
+        });
+      } catch (err) {
+        console.error(err);
+      }
+    });
+  };
+
+  const activeOrderData = useMemo(() => myOrders.find((o) => o.taskId === selectedOrderId), [myOrders, selectedOrderId]);
+
   if (selectedOrderId && activeOrderData) {
     return (
-      <ActiveOrderScreen 
-        order={activeOrderData} 
-        onBack={handleBackToList} 
-        onUpdateStatus={handleStatusUpdate} 
+      <ActiveOrderScreen
+        order={activeOrderData}
+        onBack={() => setSelectedOrderId(null)}
+        onUpdateStatus={handleStatusUpdate}
+        onVerifyOtp={handleVerifyOtp}
+        onLocationTick={handleLocationTick}
       />
     );
   }
 
   return (
     <div className="h-screen bg-gray-50 flex flex-col font-sans max-w-md mx-auto border-x shadow-2xl relative">
-      
-      {/* HEADER */}
       <header className="bg-white p-4 shadow-sm z-10 sticky top-0 flex justify-between items-center">
         <div>
-          <h1 className="text-xl font-bold text-gray-900">🚀 FastDelivery</h1>
-          <p className="text-xs text-gray-400">{isOnline ? 'Online' : 'Offline'}</p>
+          <h1 className="text-xl font-bold text-gray-900">FastDelivery</h1>
+          <p className="text-xs text-gray-500">{user?.name || 'Rider'} • {isOnline ? 'Online' : 'Offline'}</p>
         </div>
-        <div onClick={() => setIsOnline(!isOnline)} className={`px-3 py-1 rounded-full text-xs font-bold border cursor-pointer ${isOnline ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-          {isOnline ? 'ON DUTY' : 'OFF DUTY'}
+        <div className="flex items-center gap-2">
+          <div onClick={toggleOnline} className={`px-3 py-1 rounded-full text-xs font-bold border cursor-pointer ${isOnline ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+            {isOnline ? 'ON DUTY' : 'OFF DUTY'}
+          </div>
+          <button onClick={handleLogout} className="bg-red-600 hover:bg-red-500 text-white px-3 py-1 rounded text-xs font-semibold">
+            Logout
+          </button>
         </div>
       </header>
 
-      {/* CONTENT */}
       <main className="flex-1 overflow-y-auto">
         {!isOnline ? (
-          <div className="flex flex-col items-center justify-center h-full text-gray-400">
-             <span className="text-4xl">😴</span><p>Go Online to start</p>
-          </div>
+          <div className="flex flex-col items-center justify-center h-full text-gray-400"><p>Go online to start</p></div>
         ) : (
           <>
             {activeTab === 'home' && <HomeScreen availableOrders={availableOrders} onAccept={handleAccept} />}
-            {activeTab === 'myorders' && <MyOrdersScreen myOrders={myOrders} onOpen={handleOpenOrder} />}
+            {activeTab === 'myorders' && <MyOrdersScreen myOrders={myOrders} onOpen={setSelectedOrderId} />}
             {activeTab === 'history' && <HistoryScreen history={history} totalEarnings={earnings} />}
-            {activeTab === 'profile' && <ProfileScreen isOnline={isOnline} toggleOnline={() => setIsOnline(!isOnline)} />}
+            {activeTab === 'profile' && <ProfileScreen isOnline={isOnline} toggleOnline={toggleOnline} user={user} onLogout={handleLogout} />}
           </>
         )}
       </main>
 
-      {/* BOTTOM NAV */}
       <nav className="bg-white border-t flex justify-around p-2 pb-6 fixed bottom-0 w-full max-w-md z-20">
-        <button onClick={() => setActiveTab('home')} className={`flex flex-col items-center p-2 ${activeTab === 'home' ? 'text-blue-600' : 'text-gray-400'}`}>
-          <span className="text-xl">🏠</span><span className="text-[10px] font-bold">FEED</span>
-        </button>
-        <button onClick={() => setActiveTab('myorders')} className={`flex flex-col items-center p-2 relative ${activeTab === 'myorders' ? 'text-blue-600' : 'text-gray-400'}`}>
-          <div className="relative">
-             <span className="text-xl">🎒</span>
-             {myOrders.length > 0 && <span className="absolute -top-1 -right-2 w-4 h-4 bg-red-500 text-white rounded-full text-[9px] flex items-center justify-center">{myOrders.length}</span>}
-          </div>
-          <span className="text-[10px] font-bold">MY ORDERS</span>
-        </button>
-        <button onClick={() => setActiveTab('history')} className={`flex flex-col items-center p-2 ${activeTab === 'history' ? 'text-blue-600' : 'text-gray-400'}`}>
-          <span className="text-xl">💰</span><span className="text-[10px] font-bold">EARNINGS</span>
-        </button>
-        <button onClick={() => setActiveTab('profile')} className={`flex flex-col items-center p-2 ${activeTab === 'profile' ? 'text-blue-600' : 'text-gray-400'}`}>
-          <span className="text-xl">👤</span><span className="text-[10px] font-bold">PROFILE</span>
-        </button>
+        <button onClick={() => setActiveTab('home')} className={`flex flex-col items-center p-2 ${activeTab === 'home' ? 'text-blue-600' : 'text-gray-400'}`}>FEED</button>
+        <button onClick={() => setActiveTab('myorders')} className={`flex flex-col items-center p-2 ${activeTab === 'myorders' ? 'text-blue-600' : 'text-gray-400'}`}>MY ORDERS</button>
+        <button onClick={() => setActiveTab('history')} className={`flex flex-col items-center p-2 ${activeTab === 'history' ? 'text-blue-600' : 'text-gray-400'}`}>EARNINGS</button>
+        <button onClick={() => setActiveTab('profile')} className={`flex flex-col items-center p-2 ${activeTab === 'profile' ? 'text-blue-600' : 'text-gray-400'}`}>PROFILE</button>
       </nav>
     </div>
   );

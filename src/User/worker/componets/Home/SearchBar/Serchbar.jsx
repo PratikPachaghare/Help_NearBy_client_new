@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useRef, useState } from 'react';
 import axios from 'axios';
 import './SearchBar.css';
+import { BASE_URL } from '../../../../../utils/Endpiont';
 
 const SearchBar = ({ SerachWorkers ,fetchWorkers}) => {
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const debounceRef = useRef(null);
 
   const serchSugetionWorkers = async (text) => {
     try {
@@ -14,7 +16,7 @@ const SearchBar = ({ SerachWorkers ,fetchWorkers}) => {
           keyword: text,
         },
       });
-      let suggetions = res.data || [];
+      let suggetions = res?.data?.data || [];
 
       // flatten if nested arrays exist
       if (Array.isArray(suggetions[0])) {
@@ -29,22 +31,25 @@ const SearchBar = ({ SerachWorkers ,fetchWorkers}) => {
     }
   };
 
-  useEffect(() => {
-    const keyword = typeof query === "string" ? query.trim() : "";
+  const handleInputChange = (value) => {
+    setQuery(value);
+    const keyword = typeof value === 'string' ? value.trim() : '';
 
-    if (keyword === "") {
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+
+    if (!keyword) {
       setSuggestions([]);
-      fetchWorkers();
       setShowSuggestions(false);
+      fetchWorkers();
       return;
     }
 
-    const delayDebounceFn = setTimeout(() => {
+    debounceRef.current = setTimeout(() => {
       serchSugetionWorkers(keyword);
     }, 400);
-
-    return () => clearTimeout(delayDebounceFn);
-  }, [query]);
+  };
 
   const handleSearch = (text) => {
     if (!text || typeof text !== "string") return;
@@ -78,9 +83,9 @@ const SearchBar = ({ SerachWorkers ,fetchWorkers}) => {
       <form className="search-bar" onSubmit={handleSubmit}>
         <input
           type="text"
-          placeholder="🔍 Search for a worker or skill..."
+          placeholder="🔍 Search for a worker Here"
           value={typeof query === "string" ? query : ""}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => handleInputChange(e.target.value)}
           onFocus={() => {
             if (suggestions.length > 0) {
               setShowSuggestions(true);

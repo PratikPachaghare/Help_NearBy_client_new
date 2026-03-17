@@ -1,52 +1,74 @@
-import React, { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import './Requast.css';
 import PeddingRequast from '../componets/Requast/PeddingRequast';
 import AcceptedRequeast from '../componets/Requast/AcceptedRequeast';
-import { Loader2 } from '../componets/Loder/Loader';
-
-const MOCK_DB = {
-  pending: [
-    {
-      _id: "req_1",
-      user: { name: "Amit Sharma", address: "Raja Peth, Amravati", phone: "9876543210" },
-      message: "Switchboard sparking",
-      requestedDate: new Date().toISOString(),
-      requestedTime: "10:00 AM"
-    }
-  ],
-  accepted: [
-    {
-      _id: "req_2",
-      user: { name: "Priya Patil", address: "Sai Nagar, Amravati", phone: "9123456789" },
-      message: "Tap leaking in kitchen",
-      requestedDate: new Date().toISOString(),
-      requestedTime: "02:30 PM",
-      worker: { address: "Worker Hub" },
-      location: { coordinates: [77.7800, 20.9380] }
-    }
-  ]
-};
+import { apiCall } from '../../../utils/ApiCalls';
+import { useAuth } from '../../../utils/AuthContext';
 
 const Requast = () => {
-  const isWorker = true; 
+  const { user } = useAuth();
+  const isWorker = user?.role === 'worker';
   const [activeTab, setActiveTab] = useState('request');
-  const [pending, setPending] = useState(MOCK_DB.pending);
-  const [accepted, setAccepted] = useState(MOCK_DB.accepted);
+  const [requests, setRequests] = useState([]);
 
-  const handleAccept = (req) => {
-    setAccepted([...accepted, req]);
-    setPending(pending.filter((r) => r._id !== req._id));
+  const loadRequests = useCallback(async () => {
+    try {
+      const endpoint = isWorker ? '/service-requests/incoming' : '/service-requests/my';
+      const resp = await apiCall('GET', endpoint);
+      setRequests(resp?.data || []);
+    } catch (error) {
+      console.error(error);
+      setRequests([]);
+    }
+  }, [isWorker]);
+
+  useEffect(() => {
+    if (!user) return;
+    const timer = setTimeout(() => {
+      loadRequests();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [user, loadRequests]);
+
+  const pending = useMemo(() => requests.filter((r) => ['pending'].includes(r.status)), [requests]);
+  const accepted = useMemo(() => requests.filter((r) => ['accepted', 'arrived', 'work_started', 'completed'].includes(r.status)), [requests]);
+
+  const handleAccept = async (req) => {
+    try {
+      await apiCall('PATCH', `/service-requests/${req._id}/accept`);
+      loadRequests();
+    } catch (error) {
+      alert(error?.response?.data?.message || 'Failed to accept');
+    }
   };
 
-  const handleReject = (id) => {
-    setPending(pending.filter((r) => r._id !== id));
+  const handleReject = async (id) => {
+    try {
+      if (isWorker) {
+        await apiCall('PATCH', `/service-requests/${id}/reject`);
+      } else {
+        await apiCall('PATCH', `/service-requests/${id}/status`, { status: 'cancelled' });
+      }
+      loadRequests();
+    } catch (error) {
+      alert(error?.response?.data?.message || 'Failed to update');
+    }
+  };
+
+  const handleStatusUpdate = async (id, status) => {
+    try {
+      await apiCall('PATCH', `/service-requests/${id}/status`, { status });
+      loadRequests();
+    } catch (error) {
+      alert(error?.response?.data?.message || 'Failed to update status');
+    }
   };
 
   return (
     <div className="request-container">
       <div className="request-tabs">
         <button className={activeTab === 'request' ? 'tab active' : 'tab'} onClick={() => setActiveTab('request')}>
-          {isWorker ? "Requests Received" : "Requests Sent"}
+          {isWorker ? 'Requests Received' : 'Requests Sent'}
         </button>
         <button className={activeTab === 'accepted' ? 'tab active' : 'tab'} onClick={() => setActiveTab('accepted')}>
           Accepted
@@ -54,10 +76,15 @@ const Requast = () => {
       </div>
       <div className="request-content">
         {activeTab === 'request' && (
-          <PeddingRequast pending={pending} handleAccept={handleAccept} handleReject={handleReject} />
+          <PeddingRequast pending={pending} handleAccept={handleAccept} handleReject={handleReject} isWorker={isWorker} />
         )}
         {activeTab === 'accepted' && (
-          <AcceptedRequeast accepted={accepted} workerLocation={[20.9374, 77.7796]} />
+          <AcceptedRequeast
+            accepted={accepted}
+            workerLocation={[20.9374, 77.7796]}
+            isWorker={isWorker}
+            onStatusUpdate={handleStatusUpdate}
+          />
         )}
       </div>
     </div>

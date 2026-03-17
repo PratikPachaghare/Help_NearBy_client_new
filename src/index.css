@@ -1,1 +1,93 @@
 @import "tailwindcss";
+
+:root {
+	--hnb-primary: #0f3d4c;
+	--hnb-primary-soft: #14566c;
+	--hnb-accent: #2b9fb6;
+	--hnb-surface: #f4f8fa;
+	--hnb-border: #d9e6ec;
+	--hnb-text: #18323d;
+	--hnb-muted: #5e7680;
+}
+
+body {
+	margin: 0;
+	color: var(--hnb-text);
+	background: radial-gradient(circle at 10% 10%, #eef6fa 0%, #f8fbfc 45%, #ffffff 100%);
+	font-family: "Segoe UI", "Trebuchet MS", sans-serif;
+}
+
+#root {
+	min-height: 100vh;
+}
+
+.service-shell {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+
+.service-shell__hero {
+	border: 1px solid var(--hnb-border);
+	border-radius: 18px;
+	background: linear-gradient(120deg, var(--hnb-primary) 0%, var(--hnb-primary-soft) 70%, #247d96 100%);
+	color: #f7fcff;
+	padding: 1.2rem;
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	gap: 0.75rem;
+}
+
+.service-shell__tag {
+	display: inline-block;
+	margin-bottom: 0.45rem;
+	padding: 0.24rem 0.65rem;
+	border-radius: 999px;
+	font-size: 0.72rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: #d8f4ff;
+	background: rgba(255, 255, 255, 0.14);
+}
+
+.service-shell__title {
+	margin: 0;
+	font-size: clamp(1.2rem, 2vw, 1.7rem);
+	font-weight: 800;
+}
+
+.service-shell__subtitle {
+	margin: 0.35rem 0 0;
+	max-width: 60ch;
+	color: #d2e9f1;
+	font-size: 0.94rem;
+}
+
+.service-shell__badge {
+	padding: 0.4rem 0.7rem;
+	border: 1px solid rgba(255, 255, 255, 0.4);
+	border-radius: 12px;
+	font-size: 0.74rem;
+	font-weight: 700;
+	background: rgba(11, 26, 34, 0.2);
+	white-space: nowrap;
+}
+
+.service-shell__content {
+	border-radius: 16px;
+	border: 1px solid var(--hnb-border);
+	background: var(--hnb-surface);
+	padding: 0.65rem;
+}
+
+@media (max-width: 768px) {
+	.service-shell__hero {
+		flex-direction: column;
+	}
+
+	.service-shell__badge {
+		white-space: normal;
+	}
+}

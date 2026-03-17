@@ -5,30 +5,28 @@ import Request from '../../User/worker/pages/Requast';
 import About from '../../User/worker/pages/About';
 import RequestForm from '../../User/worker/componets/Requast/RequestForm';
 import { useState } from 'react';
-import Navbar from "../../User/worker/componets/Navbar/Navbar"
+import Navbar from '../../User/worker/componets/Navbar/Navbar';
+import ServiceShell from '../../layout/ServiceShell';
 
 export default function WorkerNav() {
-  const [isWorker, setIsWorker] = useState(false);
-  const [userId] = useState("user123"); 
+  const [isWorker] = useState(false);
+  const [userId] = useState('user123');
 
   return (
-    <div>
+    <ServiceShell
+      tag="User Services"
+      title="Skilled Worker Hub"
+      subtitle="Book trusted professionals with clear categories, service history, and reliable response flow."
+    >
       <Navbar />
       <Routes>
-        {/* Path "" or "/" is the index of /worker/ */}
-        <Route path="/" element={<Home isWorker={isWorker}/>} />
-        
-        {/* REMOVE the leading slashes here */}
+        <Route path="/" element={<Home isWorker={isWorker} />} />
         <Route path="profile" element={<Profile />} />
         <Route path="request" element={<Request />} />
         <Route path="about" element={<About />} />
-        
-        {/* This will match /worker/sendRequest */}
-        <Route path="sendRequest" element={<RequestForm userId={userId}/>} />
-        
-        {/* Catch-all: redirect to /worker/ home if path is wrong */}
+        <Route path="sendRequest" element={<RequestForm userId={userId} />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
-    </div>
+    </ServiceShell>
   );
 }
